@@ -106,7 +106,6 @@ function getPlantOccur(currentlat, currentlon){
             //Run funtcion to get plant details from Trefle sending plant name
             getPlantTR(TXname);
             }
-        }
           
         //If no occurances, show error, display no results
       } else {
@@ -195,7 +194,7 @@ function getDetailsTR(plantID) {
         //Display toxcicity
         var tox =TRDdata.main_species.specifications.toxicity;
         //$('.Tx').html(tox);
-         $('<div class="Minfo">Toxcitiy: ' + tox + '</div>').appendTo('.infoResult');
+         $('<div class="Minfo">Toxicity: ' + tox + '</div>').appendTo('.infoResult');
         
       
         
