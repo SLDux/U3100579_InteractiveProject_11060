@@ -1,9 +1,5 @@
-//Make arrays to store the data in, for easier retrieval
 //BEN: Let's make an array to hold the results. 
-
-//Array for all plants found in area
 var allPlantsArray = new Array();
-//Array for all plants found, that have complete Trefle data.
 var filteredPlantArray = new Array();
 
 // Load the function when the document is ready
@@ -105,27 +101,25 @@ function getPlantOccur(currentlat, currentlon) {
         //If there are occurences for your location
         if (data[0]) {
 
-            //For each recorded plant in the area
             //BEN: loop through field results (complicated data structure)
             for (z = 0; z < data[0].fieldResult.length; z++) {
                 var item = data[0].fieldResult[z];
-                
-                //Create an object
+
                 //BEN: create an object (to set up our own data structure)
                 var obj = {}
-                
-                //Take species name from API result and store in object
+
                 //BEN: now add the plant name to it
                 obj.plantName = item.label;
 
-                //Store the object in the array
                 //BEN: Add the object to the array
                 allPlantsArray.push(obj);
 
             }
-            
-            //Allow time for data to load.
-            //BEN: wait 3 seconds before executing the next function to ensure the data has loaded
+
+
+
+
+            //BEN: wait 1 second before executing the next function to ensure the data has loaded
             setTimeout(function () {
                 getPlantTR(allPlantsArray);
             }, 1000);
@@ -133,42 +127,41 @@ function getPlantOccur(currentlat, currentlon) {
             //If no occurances, show error, display no results
         } else {
             console.log('We can not find any recorded occurances for your area');
-        };
+            $('.mainResults').append('<p class="err">Data incomplete: Cannot find any recorded plants for your area</p>');
+        }
     });
-};
+}
 
 
 //Function to get details from Trefle using species name
 function getPlantTR(allPlantsArray) {
     console.log('in get plant');
 
-    //Trefle API key
+    //Trefle API key and url
     var TRkey = 'Uy9Oa00yaW42ZXlwYWtaY1BEaTdjUT09';
 
     //BEN: basically need to change the order of how we do things
 
-    //Display array count and objects in console
     //check array contents
     console.log('plant array length: ' + allPlantsArray.length)
+
     console.log(allPlantsArray);
 
-    //For every object in the allPlants array (all recorded plants in area)
     //BEN: change back to allPlantsArray.length
     for (i = 0; i < allPlantsArray.length; i++) {
         currentPlant = allPlantsArray[i];
-        //Log the name of the plant
         console.log(currentPlant.plantName);
 
-        //Get plants from Trefle url with plant name from allPlants array
         //create url with plantname from array
         var TRurl = 'https://cors-anywhere.herokuapp.com/https://trefle.io/api/plants/?&token=' + TRkey + '&scientific_name=' + currentPlant.plantName;
 
         $.getJSON(TRurl, function (TRdata) {
 
-            //If Trefle has complete data on the plant add it to the filtered array.
             //BEN: if there is some data, add it to the array
             if (TRdata.length != 0) {
-                if (TRdata[0].complete_data == true) {
+
+                 if (TRdata[0].complete_data == true) {
+                     
                 //BEN ok, so now we want to only add the plants with data to our array,
                 // to do that we'll push them into the filtteredPlantsArray
                 //BEN: create an object (to set up our own data structure)
@@ -181,7 +174,6 @@ function getPlantTR(allPlantsArray) {
                 obj.id = TRdata[0].id;
                 obj.slug = TRdata[0].slug;
 
-                //Get detailed information from Trefle and add it to the current plant object/array
                 //BEN: to make it easier, let's get the rest of the data now
                 var TRDurl = 'https://cors-anywhere.herokuapp.com/https://trefle.io/api/plants/' + TRdata[0].id + '?&token=' + TRkey;
 
@@ -196,38 +188,63 @@ function getPlantTR(allPlantsArray) {
                     }
 
 
-                    // Get scientific name
+                    // Display scientific name
                     obj.scientific_name = TRDdata.scientific_name;
 
-                    // Get common name
+                    // Display common name
                     obj.common_name = TRDdata.common_name;
 
-                    // Get toxcicity
+                    // Display toxcicity
                     obj.toxicity = TRDdata.main_species.specifications.toxicity;
 
-                    //Get other details. 
-                    //Description info
+                     //Get other details. 
+            
+                    //Flowers
+                    obj.flower_colour = TRDdata.main_species.flower.color;
+                    //Leaves
+                    obj.foliage = TRDdata.main_species.foliage.texture;
+                    obj.foliage_colour = TRDdata.main_species.foliage.color;
+                    //Seeds
+                    obj.seeds_period = TRDdata.main_species.seed.bloom_period;
+                    
                     
                     //Growing conditions
+                    obj.duration = TRDdata.main_species.duration;
+                    obj.drought_tolerant = TRDdata.main_species.growth.drought_tolerance;
+                    obj.shade_tolerant = TRDdata.main_species.growth.shade_tolerance;
+                    obj.fire_resistant = TRDdata.main_species.specifications.fire_resistance;
+                    obj.grow_habit = TRDdata.main_species.specifications.growth_habit;
+                    obj.grow_period = TRDdata.main_species.specifications.growth_period;
+                    obj.lifespan = TRDdata.main_species.specifications.lifespan;
+                    obj.height = TRDdata.main_species.specifications.mature_height.cm;
                     
-                    //Taxon (scientific names list, plant family etc.)
+                    
+                    //Family common name 
+                    obj.family_name = TRDdata.family_common_name;
                     
                 });
+                     
 
-                //Store all object data in new filtered plants array
+
+
                 //BEN: now push all the new object data to the array
                 filteredPlantArray.push(obj);
+                    
+                 
 
                 //just checking the content is in the array
-                console.log(filteredPlantArray);
-                    
-                } else {
-                    //Data not complete. Do nothing
-                };
+                //console.log(filteredPlantArray);
 
+
+                 } else {
+                     //Data not complete. Do nothing
+                    
+                     
+                 }
             } else {
-                //no data, do nothing
-            };
+                //no data, show error, do nothing.
+            
+            }
 
         });
 
@@ -238,63 +255,166 @@ function getPlantTR(allPlantsArray) {
     //BEN:
     //Now go off and create HTML
 
-    //Wait for data before moving to next function
+//I had to make the wait time longer, as it was still diplaying undefined, before it loaded the data from the api's. My internet is very slow.
     setTimeout(function () {
         createHTML();
-    }, 3000);
+    }, 130000);
 
 
+ 
 }
 
 
-//Function to display data on page
+      //Display the data on the page, by creating html with jQuery.
 function createHTML() {
     console.log('in create HTML function');
 
     console.log(filteredPlantArray);
 
-    //For each plant in the filtered array
-    for (i = 0; i < filteredPlantArray.length; i++) {
+    //For each plant in the filtered plants array
+    for (i = 0; i < filteredPlantArray.length; i++) {        
         var plant = filteredPlantArray[i];
         console.log(filteredPlantArray[i]);
-
+        
+      //  if (plant.image == undefined) {
+            //put an image placeholder if no image
+            
+       // }
+        
+         
+        
+        
         //create html elements
         var container = $('<div class="R">');
 
         var imageContainer = $('<div class="imgResult">');
         var infoContainer = $('<div class="infoResult">');
 
-        //Put everything where it is supposed to be on index.html
-        imageContainer.append('<img width="250" class="TRimg" src="' + plant.image + '"></img>');
+        imageContainer.append('<img width="300" id="'+ plant.id + '" class="TRimg" src="' + plant.image + '"></img>');
 
         infoContainer.append('<div class="Minfo">Scientific name: ' + plant.scientific_name + '</div>');
         infoContainer.append('<div class="Minfo">Common name: ' + plant.common_name + '</div>');
-        infoContainer.append('<div class="Minfo">Toxicity: ' + plant.toxicity + '</div>');
-
-        //Create individual plant page and display data. 
         
-        //Load data onto plant.html when plant image is clicked on
+        //Display smily face icon with toxicity information
+        switch(plant.toxicity) {
+            case "None":
+                infoContainer.append('<div class="Minfo">Toxicity: ' + plant.toxicity + '<div id="none"></div>');
+                break;
+            case "Slight":
+                infoContainer.append('<div class="Minfo">Toxicity: ' + plant.toxicity + '<div id="slight"></div>');
+                break;
+            case "Moderate":
+                infoContainer.append('<div class="Minfo">Toxicity: ' + plant.toxicity + '<div  id="moderate"></div>');
+                break;
+            case "Severe":
+                infoContainer.append('<div class="Minfo">Toxicity: ' + plant.toxicity + '<div  id="severe"></div></div>');
+                break;
+            default: 
+                infoContainer.append('<div class="Minfo">Toxicity: ' + plant.toxicity + '</div>');
+        }
 
+        $(container).append(imageContainer);
+        $(container).append(infoContainer);
+        
+        $('.mainResults').append(container);
+        
+        
+        //Details
+        
+        
+        //Add the details information to the page as well. 
+        var plantHeight = Math.round(plant.height);
+        
+        //Family
+        infoContainer.append('<div class="Dinfo">Family: ' + plant.family_name + '</div>');
+        
+        //Description
+        infoContainer.append('<h3>Description:</h3><div class="Dinfo">Has <em>' + plant.flower_colour + '</em> flowers. Foliage is <em>' + plant.foliage_colour + '</em> and <em>' + plant.foliage + '</em>. Seeds bloom in <em>' + plant.seeds_period + '</em>.</div>');
 
-        $('.mainResults').append(imageContainer);
-        $('.mainResults').append(infoContainer);
+        
+        //Growing conditions
+        infoContainer.append('<h3>Growing conditions:</h3><div class="Dinfo">Has <em>' + plant.duration + '</em>, <em>' + plant.grow_habit + '</em> growth. Grows in <em>' + plant.grow_period + '</em>. Has a <em>' + plant.lifespan + '</em> lifespan, and grows to a height of <em>' + plantHeight + '</em> cm.</div>');
+    
+        infoContainer.append('<div class="Dinfo">Drought tolerance: ' + plant.drought_tolerant + ' </div>');
+    
+        infoContainer.append('<div class="Dinfo">Shade tolerance: ' + plant.shade_tolerant + ' </div>');
+    
+        infoContainer.append('<div class="Dinfo">Fire resistance: ' + plant.fire_resistant + ' </div>');
+                    
+        
+        //The Extra bits for the lightbox/modal that didn't work. 
+        
+//        var lightboxid = "Lightbox" + plant.id;
+//        var boxid = "box" + plant.id;
+//        
+//         //Make details lightbox
+//        var detailsContainer = $('<div id="' + lightboxid + '" class="modal"><span id ="' + boxid + '" class="close" onclick="closelightbox();">&times;</span><div class="modalContent"');
+//
+//        var detailsImageContainer = $('<div class="imgDetail">');
+//        var detailsInfoContainer = $('<div class="infoDetail">'); 
+//     
+//        var plantHeight = Math.round(plant.height);
+//
+//        detailsImageContainer.append('<img width="500" class="Dimg" src="' + plant.image + '"></img>');
+//
+//        detailsInfoContainer.append('<div class="Dinfo">Scientific name: ' + plant.scientific_name + '</div>');
+//        detailsInfoContainer.append('<div class="Dinfo">Common name: ' + plant.common_name + '</div>');
+//        detailsInfoContainer.append('<div class="Dinfo">Toxicity: ' + plant.toxicity + '</div>');
+//        
+//        //Family
+//        detailsInfoContainer.append('<div class="Dinfo">Family: ' + plant.family_name + '</div>');
+//    
+//        //Description
+//        detailsInfoContainer.append('<h3>Description:</h3><div class="Dinfo">Has <em>' + plant.flower_colour + '</em> flowers. Foliage is <em>' + plant.foliage_colour + '</em> and <em>' + plant.foliage + '</em>. Seeds bloom in <em>' + plant.seeds_period + '</em>.</div>');
+//                     
+//        
+//        //Growing conditions
+//        detailsInfoContainer.append('<h3>Growing conditions:</h3><div class="Dinfo">Has <em>' + plant.duration + '</em>, <em>' + plant.grow_habit + '</em> growth. Grows in <em>' + plant.grow_period + '</em>. Has a <em>' + plant.lifespan + '</em> lifespan, and grows to a height of <em>' + plantHeight + '</em> cm.</div>');
+//    
+//        detailsInfoContainer.append('<div class="Dinfo">Drought tolerance: ' + plant.drought_tolerant + '</div>');
+//        detailsInfoContainer.append('<div class="Dinfo">Shade tolerance: ' + plant.shade_tolerant + '</div>');
+//        detailsInfoContainer.append('<div class="Dinfo">Fire resistance: ' + plant.fire_resistant + '</div>')
+//
+//        $(detailsContainer).append(detailsImageContainer);
+//        $(detailsContainer).append(detailsInfoContainer);
+//        $('.mainResults').append(detailsContainer);
+        
+       
+       
+
+       
+   
+    
+}
+   
+
+    //Run functions to open/close lightbox
+//    openlightbox();
+//    closelightbox();
+      
     }
 
-    filteredPlantArray.forEach(function (plant) {
+//function openlightbox() {
+//        
+//    $(document).ready(function (){
+//   $('.TRimg').click(function(){
+//        var myID = $(this).attr("id");
+//       var modalid = ("Lightbox" + myID);
+//       console.log(modalid);
+// //This line didn't work. And I didn't have time to get it working.
+//       $(modalid).show();
+//   });
+//});   
+//}
+
+//function closelightbox() {
+//     $(document).ready(function (){
+//   $('.TRimg').click(function(){
+//      var mySID = $(this).attr("id");
+//     $("Light" + mySID).hide();
+//   });
+//});
+//}
 
 
-
-        //    $('<div class="R"><div class="imgResult"></div><div class="infoResult"> </div></div>').appendTo('.mainResults');
-
-
-
-
-    })
-
-
-
-
-
-}
-                    
                     
