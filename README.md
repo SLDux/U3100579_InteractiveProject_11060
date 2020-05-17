@@ -194,15 +194,15 @@ From this information I drew up several sketches for the design, that evolved as
 #### Design
 
 Early ideas featuring maps, and options for user inputed locations.
-![](PJimages/DSC06183.jpg) 
+![](PJimages/DSC06183.JPG) 
 
-![](PJimages/DSC06184.jpg) 
+![](PJimages/DSC06184.JPG) 
 
 Closer to my end design, featuring individual pages or modals for more details. Also experimented with including a puzzle page, based on a previous idea.
-![](PJimages/DSC06186.jpg)
+![](PJimages/DSC06186.JPG)
 
 Quick sketch of my final proposed design.
-![](PJimages/DSC06193.jpg)
+![](PJimages/DSC06193.JPG)
 
 For the design of the application, I used the simplicity and functionality of apps like Plantsnap, Weeds.org, ABC plant finder and GroNATIVE as inspiration. Keeping the design simple, readable and in a neat grid type layout. Images featured heavily in my design, as per convention for most plant identification apps, this also provides an easy way to identify the pants. However as I had no choice over what images would be featured, I decided to keep the rest of the design neat, readable, making use of images and monotone colours to avoid looking too cluttered. 
 
